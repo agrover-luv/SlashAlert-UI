@@ -19,6 +19,7 @@ import { Link, useLocation } from "react-router-dom";
 import { User, Product } from "@/api/entities";
 import authService from "@/services/authService";
 import { createPageUrl } from "@/utils";
+import { ApiStatusIndicator, HeaderApiStatus } from "@/components/api/ApiStatusIndicator";
 import { 
   Home, 
   Plus, 
@@ -69,7 +70,7 @@ export default function Layout({ children, currentPageName }) {
         setCurrentUser(user);
         
         if (user) {
-          const allProducts = await Product.filter({ created_by: user.email });
+          const allProducts = await Product.filter({});
           // Filter out soft-deleted products for stats
           const activeProducts = allProducts.filter(product => !product.deleted);
           const totalProducts = activeProducts.length;
@@ -125,7 +126,7 @@ export default function Layout({ children, currentPageName }) {
       if (currentUser) {
         setIsLoadingStats(true);
         try {
-          const allProducts = await Product.filter({ created_by: currentUser.email });
+          const allProducts = await Product.filter({});
           // Filter out soft-deleted products for stats
           const activeProducts = allProducts.filter(product => !product.deleted);
           const totalProducts = activeProducts.length;
@@ -272,12 +273,13 @@ export default function Layout({ children, currentPageName }) {
                 alt="SlashAlert Icon" 
                 className="w-10 h-10 rounded-lg shadow-md"
               />
-              <div>
+              <div className="flex-1">
                 <h1 className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   SlashAlert
                 </h1>
                 <p className="text-xs text-gray-500">Price tracking made easy</p>
               </div>
+              <HeaderApiStatus />
             </div>
           </div>
 
@@ -424,6 +426,7 @@ export default function Layout({ children, currentPageName }) {
 
         <main className="flex-1 flex flex-col min-h-screen">
           <div className="flex-grow p-4 md:p-8">
+            <ApiStatusIndicator />
             {children}
           </div>
         </main>

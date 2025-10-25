@@ -1,8 +1,10 @@
+import store from '../store/index.js';
+import { loginWithGoogle, logout, setLoading, setError } from '../store/authSlice.js';
+
 // Google SSO Authentication Service
 class AuthService {
   constructor() {
     this.googleAuth = null;
-    this.currentUser = null;
     this.isInitialized = false;
     
     // Initialize Google Identity Services
@@ -41,44 +43,20 @@ class AuthService {
       
       this.isInitialized = true;
       
-      // Check if user is already logged in (check localStorage)
-      const storedUser = localStorage.getItem('slashalert_user');
-      if (storedUser) {
-        try {
-          this.currentUser = JSON.parse(storedUser);
-        } catch (error) {
-          console.error('Error parsing stored user:', error);
-          localStorage.removeItem('slashalert_user');
-        }
-      }
+      // No need to check localStorage here since Redux auth slice handles initial state
     }
   }
 
   handleGoogleCallback(response) {
     try {
-      // Decode the JWT token to get user information
-      const userInfo = this.parseJWT(response.credential);
+      console.log('🔐 Google callback received:', response);
       
-      const user = {
-        id: userInfo.sub,
-        email: userInfo.email,
-        full_name: userInfo.name,
-        given_name: userInfo.given_name,
-        family_name: userInfo.family_name,
-        picture: userInfo.picture,
-        email_verified: userInfo.email_verified,
-        role: 'user', // Default role, can be updated based on your business logic
-        subscription_status: 'free' // Default subscription status
-      };
-      
-      this.currentUser = user;
-      
-      // Store user in localStorage
-      localStorage.setItem('slashalert_user', JSON.stringify(user));
+      // Use Redux action to handle login instead of local state management
+      store.dispatch(loginWithGoogle({ credential: response.credential }));
       
       // Trigger custom event for components to react to authentication
       window.dispatchEvent(new CustomEvent('authStateChanged', { 
-        detail: { user, isAuthenticated: true } 
+        detail: { user: store.getState().auth.user, isAuthenticated: true } 
       }));
       
       // Check for stored redirect URL, otherwise go to dashboard
@@ -90,6 +68,7 @@ class AuthService {
       
     } catch (error) {
       console.error('Error handling Google callback:', error);
+      store.dispatch(setError('Failed to process Google authentication'));
     }
   }
 
@@ -144,9 +123,8 @@ class AuthService {
 
   async signOut() {
     try {
-      // Clear user data
-      this.currentUser = null;
-      localStorage.removeItem('slashalert_user');
+      // Use Redux action to handle logout
+      store.dispatch(logout());
       
       // Sign out from Google
       if (window.google && window.google.accounts) {
@@ -161,16 +139,24 @@ class AuthService {
       return true;
     } catch (error) {
       console.error('Error signing out:', error);
+      store.dispatch(setError('Failed to sign out'));
       return false;
     }
   }
 
   getCurrentUser() {
-    return this.currentUser;
+    return store.getState().auth.user;
+  }
+
+  getToken() {
+    console.log('🔍 Getting token from Redux store...');
+    const token = store.getState().auth.token;
+    console.log('🎫 Token from Redux:', token ? 'Present (length: ' + token.length + ')' : 'Not found');
+    return token;
   }
 
   isAuthenticated() {
-    return !!this.currentUser;
+    return store.getState().auth.isAuthenticated;
   }
 
   // Method to render Google Sign-In button

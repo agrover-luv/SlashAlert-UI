@@ -106,8 +106,7 @@ export default function Dashboard() {
         // Refresh data to show updated prices
         setTimeout(async () => {
           try {
-            const currentUser = await User.me();
-            const updatedProducts = await Product.filter({ created_by: currentUser.email }, "-updated_date");
+            const updatedProducts = await Product.filter({}, "-updated_date");
             const activeUpdatedProducts = updatedProducts.filter(product => !product.deleted);
             setProducts(activeUpdatedProducts);
           } catch (error) {
@@ -123,15 +122,15 @@ export default function Dashboard() {
   const loadInitialData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const currentUser = await User.me(); // Fetch current user
+      const currentUser = await User.me(); // Fetch current user for plan info
       setUserPlan(currentUser.plan); // Set user plan state
 
       const [userProducts, retailerData, userAlerts] = await Promise.all([
-        // Filter products by the current user's email
-        Product.filter({ created_by: currentUser.email }, "-updated_date"),
+        // API will filter by user via bearer token automatically
+        Product.filter({}, "-updated_date"),
         Retailer.list(),
-        // Filter alerts by the current user's ID
-        Alert.filter({ user_id: currentUser.id }, "-created_date", 50)
+        // API will filter by user via bearer token automatically  
+        Alert.filter({}, "-created_date", 50)
       ]);
       
       // Filter out soft-deleted products for regular users
@@ -175,7 +174,7 @@ export default function Dashboard() {
     });
 
     // Make sure we're operating on the latest product list
-    const currentProducts = await Product.filter({ created_by: (await User.me()).email }, "-updated_date");
+    const currentProducts = await Product.filter({}, "-updated_date");
     const activeProducts = currentProducts.filter(p => p.is_active && !p.deleted);
     
     let successCount = 0;

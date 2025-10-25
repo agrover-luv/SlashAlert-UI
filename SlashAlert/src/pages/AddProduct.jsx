@@ -30,7 +30,6 @@ export default function AddProduct() {
         const user = await User.me();
         if (user && user.subscription_plan !== 'premium') {
           const userProducts = await Product.filter({ 
-            created_by: user.email, 
             is_active: true, 
             deleted: false 
           });

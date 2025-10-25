@@ -17,6 +17,8 @@ import AdminDashboard from "./AdminDashboard";
 
 import Home from "./Home";
 
+import ApiTest from "./ApiTest";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -36,6 +38,8 @@ const PAGES = {
     AdminDashboard: AdminDashboard,
     
     Home: Home,
+    
+    ApiTest: ApiTest,
     
 }
 
@@ -79,6 +83,8 @@ function PagesContent() {
                 <Route path="/AdminDashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                 
                 <Route path="/Home" element={<Home />} />
+                
+                <Route path="/ApiTest" element={<ApiTest />} />
                 
             </Routes>
         </Layout>
