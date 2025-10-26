@@ -9,6 +9,8 @@ import { AlertService } from "../alerts/AlertService";
  * @returns {Promise<{success: boolean, newPrice?: number, error?: string}>} - The result of the operation.
  */
 export const checkAndUpdateProductPrice = async (product) => {
+  return { success: false, error: "Skipped price check" };
+  /*
   if (!product || !product.url) {
     return { success: false, error: "Invalid product or URL provided." };
   }
@@ -75,4 +77,5 @@ IMPORTANT: Return the final price as a number (e.g., 299.99), not a discount amo
     console.error(`Price check failed for product ${product.id}:`, error);
     return { success: false, error: 'An unexpected error occurred during the price check.' };
   }
+    */
 };

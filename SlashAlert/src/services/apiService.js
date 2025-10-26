@@ -151,7 +151,7 @@ class ApiService {
   // Check if API is available
   async healthCheck() {
     try {
-      const response = await fetch(`${this.baseURL}/health`, {
+      const response = await fetch(`${this.baseURL}/api/Health/heartbeat`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -231,7 +231,38 @@ class ApiService {
 
   // User API
   async getCurrentUser() {
-    return this.get('/users/me');
+    // Instead of making an API call, get user data from Redux auth state
+    const authState = store.getState().auth;
+    const { user, token } = authState;
+    
+    if (user && token) {
+      console.log('👤 Using current user from auth state:', user.email);
+      
+      // Return user data in a format consistent with what the API would return
+      const currentUser = {
+        id: user.id,
+        email: user.email,
+        name: user.full_name || user.given_name,
+        given_name: user.given_name,
+        family_name: user.family_name,
+        picture: user.picture,
+        email_verified: user.email_verified,
+        role: user.role || 'user',
+        subscription: {
+          plan: user.subscription_status || 'free',
+          status: 'active'
+        },
+        preferences: {
+          email_notifications: true,
+          price_alert_threshold: 10
+        },
+        created_at: new Date().toISOString() // We don't have this from JWT, so use current time
+      };
+      
+      return currentUser;
+    } else {
+      throw new Error('User not authenticated. Please log in again.');
+    }
   }
 
   async updateUserProfile(userData) {

@@ -29,9 +29,9 @@ export const ApiProvider = ({ children }) => {
     try {
       const health = await apiService.healthCheck();
       setApiStatus({
-        isAvailable: health.status === 'ok',
+        isAvailable: health.status === 'Healthy',
         isChecking: false,
-        error: health.status !== 'ok' ? health.message : null,
+        error: health.status !== 'Healthy' ? health.message : null,
         lastChecked: new Date()
       });
     } catch (error) {

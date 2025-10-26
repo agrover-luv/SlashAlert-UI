@@ -45,15 +45,16 @@ export const ApiTestPanel = () => {
     },
     {
       name: 'Get Current User',
-      endpoint: '/api/users/me',
+      endpoint: '/api/users/me (using auth state)',
       method: 'GET',
       test: async () => {
         try {
           const user = await apiService.getCurrentUser();
-          return user && typeof user === 'object';
+          console.log('👤 Current user from auth state:', user);
+          return user && typeof user === 'object' && user.email;
         } catch (error) {
-          // Expected if not implemented yet
-          return error.message.includes('HTTP') || error.message.includes('fetch');
+          console.error('❌ Failed to get current user from auth state:', error);
+          return false;
         }
       }
     },
@@ -289,6 +290,26 @@ export const ApiTestPanel = () => {
             }
           </div>
         )}
+
+                {/* Error Details */}
+        {Object.values(testResults).some(result => result?.error) && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Error Details</Label>
+            {Object.entries(testResults)
+              .filter(([_, result]) => result?.error)
+              .map(([testName, result]) => (
+                <Alert key={testName} variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>{testName}:</strong> {result.error}
+                  </AlertDescription>
+                </Alert>
+              ))
+            }
+          </div>
+        )}
+
+        {/* Information */}
 
         {/* Information */}
         <Alert>
